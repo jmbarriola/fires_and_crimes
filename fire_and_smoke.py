@@ -31,13 +31,13 @@ def convert_date_to_string(date):
     date = date.replace('-','')
     return date
 
-def extract_geo_shape(url, date, dataset):
+def extract_geo_shape(url,sink_path, date, dataset):
     # Convert date to string for request
     sday =  convert_date_to_string(date)
     # Create url for dataset and day
     url = url.format(dataset.upper(),dataset,sday)
     print('Downloading {} {} shapefile...'.format(sday,dataset))
-    z = return_zip(url)
+    z = return_zip(url, sink_path)
     print("Done")
 
 def create_geo_df(date, shape_path, dataset, crs={'init' :'epsg:4326'}):
@@ -52,3 +52,10 @@ def create_geo_df(date, shape_path, dataset, crs={'init' :'epsg:4326'}):
         # Set projection
         geo_df.crs = crs
     return geo_df
+
+def count_fires_by_city(fires_by_city_df, grouping_cols_list=['state','city']):
+    # Select grouping columns
+    fires_by_city_df = fires_by_city_df[grouping_cols_list]
+    # Count crimes by state, city and date
+    fires_by_city_df = fires_by_city_df.groupby(grouping_cols_list).size().reset_index(name='fires_count')
+    return fires_by_city_df
