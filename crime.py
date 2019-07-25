@@ -5,9 +5,6 @@ from shapely.geometry import Point, shape
 
 client = Socrata("moto.data.socrata.com",None)
 
-columns = ['incident_datetime','incident_type_primary','parent_incident_type','state','city','latitude','longitude']
-columns = ','.join(columns)
-
 def create_crime_df(df_socrata_key, columns_list, date):
     
     # Convert date to string
@@ -29,7 +26,7 @@ def create_crime_by_date_city_df(crimes_df, grouping_cols_list=['incident_date',
     # Select grouping columns
     crime_by_date_city_df = crimes_df[grouping_cols_list]
     # Count crimes by state, city and date
-    crime_by_date_city_df = crime_by_date_city_df.groupby(grouping_cols_list).size().reset_index(name='count')
+    crime_by_date_city_df = crime_by_date_city_df.groupby(grouping_cols_list).size().reset_index(name='crime_count')
     return crime_by_date_city_df
 
 def create_cities_df(crimes_df, geo_cols_list=['state', 'city', 'latitude', 'longitude']):
@@ -46,4 +43,11 @@ def assign_geom_cities(cities_df, crs = {'init':'epsg:4326'}):
     geometry = [Point(xy) for xy in zip(cities_df['longitude'], cities_df['latitude'])]
     # Create cities geo dataframe
     cities_df = gpd.GeoDataFrame(cities_df, crs=crs, geometry=geometry)
+    return cities_df
+
+def create_city_buffer(cities_df,buffer_radius):
+    # Create cities buffer in meters
+    cities_df['geometry'] = cities_df.geometry.buffer(buffer_radius)
+    # Assign value of the buffer as column
+    cities_df['buffer'] = buffer_radius
     return cities_df
