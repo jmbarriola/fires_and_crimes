@@ -16,11 +16,13 @@ def create_crime_df(df_socrata_key, columns_list, date):
     
     # Extract results (JSON) from socrata API 
     results = client.get(df_socrata_key, limit=1000000000,select = columns, where = where_clause)
-    # Convert to dataframe 
-    df = pd.DataFrame.from_records(results)
-    # Convert datetime to date
-    df['incident_date'] = pd.to_datetime(df['incident_datetime']).dt.date
-    return df
+    # If no data, returns an empty list
+    if results:
+        # Convert to dataframe 
+        df = pd.DataFrame.from_records(results)
+        # Convert datetime to date
+        df['incident_date'] = pd.to_datetime(df['incident_datetime']).dt.date
+        return df
 
 def create_crime_by_date_city_df(crimes_df, grouping_cols_list=['incident_date','parent_incident_type','state','city']):
     # Select grouping columns
