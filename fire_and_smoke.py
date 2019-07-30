@@ -45,6 +45,8 @@ def create_geo_df(date, shape_path, dataset, crs={'init' :'epsg:4326'}):
     sday =  convert_date_to_string(date)
     # Define local shape path
     shp_path = shape_path +'hms_{}{}.shp'.format(dataset, sday)
+    #Empty df
+    geo_df = pd.DataFrame()
     # Chech if path exists
     if os.path.isfile(shp_path):
         # Read as geo dataframe
