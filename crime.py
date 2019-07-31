@@ -5,6 +5,14 @@ from shapely.geometry import Point, shape
 
 client = Socrata("moto.data.socrata.com",None)
 
+def create_keys_list(df_path, api_key_column='api_key'):
+        # Read df
+        df = pd.read_csv(df_path)
+        # Select column
+        api_keys = df[api_key_column].tolist()
+        
+        return api_keys
+
 def create_crime_df(df_socrata_key, columns_list, date):
     
     # Convert date to string
@@ -22,6 +30,8 @@ def create_crime_df(df_socrata_key, columns_list, date):
         df = pd.DataFrame.from_records(results)
         # Convert datetime to date
         df['incident_date'] = pd.to_datetime(df['incident_datetime']).dt.date
+        # Filter rows with impossible coordinates
+        df=df[(pd.to_numeric(df['latitude'])<=180.0) & (pd.to_numeric(df['longitude'])>=-180.0)]
         return df
 
 def create_crime_by_date_city_df(crimes_df, grouping_cols_list=['incident_date','parent_incident_type','state','city']):
