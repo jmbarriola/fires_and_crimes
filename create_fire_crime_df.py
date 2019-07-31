@@ -15,11 +15,20 @@ df_socrata_key_list = create_keys_list('/media/juan/DATA/fires_and_crimes/urls.c
 columns_list = ['incident_datetime','incident_type_primary','parent_incident_type','state','city','latitude','longitude']
 
 # Date
-start_date = '2018-01-28'
-end_date = '2018-01-31'
+start_date = '2018-02-01'
+end_date = '2018-02-28'
 date_range = build_date_range(start_date, end_date)
 
-df_list = [] 
+# Final df
+create_new_dataframe=False
+final_df_name="df_test-2018.csv"
+final_df_columns=['incident_date','parent_incident_type','crime_count','city','state','total_smoke_density','fires_count']
+
+# When creating new dataframe set columns names
+if create_new_dataframe:
+    final_df = pd.DataFrame(columns=['incident_date','parent_incident_type','crime_count','city','state','total_smoke_density','fires_count'])
+    final_df.to_csv(final_df_name,index=False, header=True, mode='w')
+
 
 for date in date_range:
     # Smoke df
@@ -44,7 +53,6 @@ for date in date_range:
 
     # For loop for different cities
     for df_socrata_key in df_socrata_key_list:
-        print(df_socrata_key)
         # Crime df
         crimes = create_crime_df(df_socrata_key, columns_list, date)
         # If there's no data for city returns None
@@ -58,7 +66,7 @@ for date in date_range:
         #Append df to lists
         crimes_list.append(crime_by_city)
         cities_list.append(cities)
-        time.sleep(0.5)
+        time.sleep(0.1)
     
     # Crimes dataframe
     crime_by_city = pd.concat(crimes_list)
@@ -93,11 +101,9 @@ for date in date_range:
     # Join crimes and smoke
     cities_smoke =pd.merge(crime_by_city, cities_smoke)
     # Final df
-    final_df = pd.merge(cities_smoke, cities_fire)[['incident_date','parent_incident_type','crime_count','city','state','total_smoke_density','fires_count']]
+    final_df = pd.merge(cities_smoke, cities_fire)[final_df_columns]
+    # Drop duplicate records. Maybe the same city is on different api keys.
+    final_df.drop_duplicates(inplace=True)
    
     print('Writing df for {}'.format(date))
-    df_list.append(final_df)
-    
-
-df_list = pd.concat(df_list)
-df_list.to_csv("df_test_01-2018.csv",index=False)
+    final_df.to_csv(final_df_name,index=False, header=False, mode='a')
