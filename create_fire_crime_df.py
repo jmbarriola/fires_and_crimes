@@ -11,12 +11,12 @@ meters_crs='+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +da
 
 # Crime params
 client = Socrata("moto.data.socrata.com",None)
-df_socrata_key_list = ["p6kq-vsa3", "jrat-ef37", 'wrmr-tdyp','nnzs-rxi5']
+df_socrata_key_list = create_keys_list('/media/juan/DATA/fires_and_crimes/urls.csv')
 columns_list = ['incident_datetime','incident_type_primary','parent_incident_type','state','city','latitude','longitude']
 
 # Date
-start_date = '2018-01-01'
-end_date = '2018-12-31'
+start_date = '2018-01-28'
+end_date = '2018-01-31'
 date_range = build_date_range(start_date, end_date)
 
 df_list = [] 
@@ -44,7 +44,7 @@ for date in date_range:
 
     # For loop for different cities
     for df_socrata_key in df_socrata_key_list:
-
+        print(df_socrata_key)
         # Crime df
         crimes = create_crime_df(df_socrata_key, columns_list, date)
         # If there's no data for city returns None
@@ -100,4 +100,4 @@ for date in date_range:
     
 
 df_list = pd.concat(df_list)
-df_list.to_csv("df_test_2018.csv",index=False)
+df_list.to_csv("df_test_01-2018.csv",index=False)
